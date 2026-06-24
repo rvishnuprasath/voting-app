@@ -37,16 +37,3 @@ stages:
         command: 'build'
         Dockerfile: 'worker/Dockerfile'
         tags: '$(tag)'
-- stage: Push
-  displayName: Push 
-  jobs:
-  - job: Push
-    displayName: Push
-    steps:
-    - task: Docker@2
-      displayName: Push an image to container registry
-      inputs:
-        containerRegistry: '$(dockerRegistryServiceConnection)'
-        repository: '$(imageRepository)'
-        command: 'push'
-        tags: '$(tag)'
