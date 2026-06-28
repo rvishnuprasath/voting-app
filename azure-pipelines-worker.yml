@@ -50,3 +50,17 @@ stages:
         repository: '$(imageRepository)'
         command: 'push'
         tags: '$(tag)'
+- stage: Update
+  displayName: Update stage
+  dependsOn: Push
+  jobs:
+  - job: Update
+    displayName: Update
+    steps:
+    - checkout: self
+      persistCredentials: true
+      fetchDepth: 0      
+    - task: ShellScript@2
+      inputs:
+        scriptPath: 'scripts/updateK8sManifests.sh'
+        args: 'worker $(imageRepository) $(tag)'
