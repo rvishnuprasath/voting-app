@@ -52,11 +52,14 @@ stages:
         tags: '$(tag)'
 - stage: Update
   displayName: Update stage
+  dependsOn: Push
   jobs:
   - job: Update
     displayName: Update
     steps:
+    - checkout: self
+      persistCredentials: true
     - task: ShellScript@2
       inputs:
         scriptPath: 'scripts/updateK8sManifests.sh'
-        args: 'vote $imageRepository $tag'
+        args: 'vote $(imageRepository) $(tag)'
