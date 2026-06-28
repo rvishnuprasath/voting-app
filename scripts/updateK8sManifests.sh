@@ -1,28 +1,31 @@
 #!/bin/bash
 
-set -x
+set -e
 
-# Set the repository URL
-REPO_URL="https://github.com/rvishnuprasath/voting-app.git"
+APP_NAME=$1
+IMAGE_NAME=$2
+IMAGE_TAG=$3
 
-# Clone the git repository into the /tmp directory
-git clone "$REPO_URL" /tmp/temp_repo
+MANIFEST="k8s-specifications/${APP_NAME}-deployment.yaml"
 
-# Navigate into the cloned repository directory
-cd /tmp/temp_repo
+echo "Updating image in ${MANIFEST}"
+echo "New Image: webappaksacr.azurecr.io/${IMAGE_NAME}:${IMAGE_TAG}"
 
-# Make changes to the Kubernetes manifest file(s)
-# For example, let's say you want to change the image tag in a deployment.yaml file
-sed -i "s|image:.*|image: webappaksacr.azurecr.io/$2:$3|g" k8s-specifications/$1-deployment.yaml
+# Replace image line
+sed -i "s|image:.*|image: webappaksacr.azurecr.io/${IMAGE_NAME}:${IMAGE_TAG}|g" "$MANIFEST"
 
-# Add the modified files
-git add .
+# Configure Git
+git config user.name "rvishnuprasath"
+git config user.email "r.vishnuprasath1994@gmail.com"
 
-# Commit the changes
-git commit -m "Update Kubernetes manifest"
+# Commit changes
+git add "$MANIFEST"
 
-# Push the changes back to the repository
-git push
+if git diff --cached --quiet; then
+    echo "No changes detected."
+    exit 0
+fi
 
-# Cleanup: remove the temporary directory
-rm -rf /tmp/temp_repo
+git commit -m "Update ${APP_NAME} image to ${IMAGE_TAG}"
+
+git push origin main
